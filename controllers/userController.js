@@ -1,7 +1,10 @@
-const { find } = require('../models/items');
 const User=require('../models/user');
+const UserItem=require('../models/userItem.model')
 let jwt = require('jsonwebtoken');
-const bcrypt=require('bcrypt')
+const bcrypt=require('bcrypt');
+const items = require('../models/items');
+const user = require('../models/user');
+const { ReturnDocument } = require('mongodb');
 require('dotenv').config();
 const Secratkey=process.env.Secrat_key
 
@@ -25,14 +28,13 @@ exports.authentication = (req, res, next) => {
         // If the token is valid, decoded will contain user info
         console.log('Token verification completed...');
         console.log(user, 'inside token');  // Logs decoded user data
-
+        
         // Attach the decoded user info (e.g., user ID) to req.user for use in the next middleware
         req.user = user;
         // Proceed to the next middleware or route handler
         next();
     });
 };
-
 exports.getAllUsers=async(req,res)=>{
     const userdata=await User.find();
     try{
@@ -62,7 +64,7 @@ exports.login=async(req,res)=>{
     if(match){
         const token=jwt.sign({ id: userfound._id},Secratkey, { expiresIn: '1h' })
         console.log(token,'this is token')
-        res.json({tokens:token,Data:{name,email},success:true, statusCode:200})
+        res.json({tokens:token,Data:{name,email,id:userfound._id},success:true, statusCode:200})
     }
     else{
         res.json({Data:'notfound',success:true, statusCode:200})
@@ -108,14 +110,40 @@ exports.signup = async (req, res) => {
 };
 exports.getuserbyId=async(req,res)=>{
 const founduser=await User.findById(req.params.id)
+
 console.log(founduser,'single user found');
 try{
-    if(founduser){
-        res.json({Data:founduser,success:true,statusCode:200})
+    if(founduser && req.params.id===req.user.id.toString()){
+            console.log('is in side of if')
+            const userItems = await items.find({ user: req.user.id });
+            
+            console.log(userItems);
+           return res.json({data:userItems,status:"ok",stausCode:200})
+        
     }
-    res.json({Data:'not found backend',success:false,statusCode:500})
-}
+    
+    }
 catch(error){
-    res.json({Data:'error from frontend',status:false,statusCode:404})
+  return  res.json({Data:'error from frontend',status:false,statusCode:404})
 }
 }
+
+// exports.userItem(req,res)=async()=>{
+// const item=req.params.itemId
+// const userId=req.params.userId
+// const userItem=new UserItem({user:userId,items:item})
+// try{
+//     if (item){
+//         if(item.quantity>0){
+//             res.json({
+//                 Data:item,
+//                 status:true,
+//                 statusCode:200
+//             })
+//         }
+//     }
+// }catch(error){
+//     console.log(error)
+// }
+
+// }

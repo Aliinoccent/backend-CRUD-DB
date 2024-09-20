@@ -12,12 +12,15 @@ exports.getItems = async (req, res) => {
 
 // Create a new item
 exports.createItem = async (req, res) => {
+  
   const { name, quantity, price } = req.body;
-  const newItem = new Item({ name, quantity, price });
+  
+
+  const newItem = new Item({ name, quantity, price,user:req.user.id});
 
   try {
     const item = await newItem.save();
-    res.status(201).json(item);
+    res.json({Data:[item],status:true,statusCode:200})
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -30,7 +33,7 @@ exports.getItemById = async (req, res) => {
     if (!item) return res.status(404).json({ message: 'Item not found' });
     res.json(item);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message }); 
   }
 };
 
