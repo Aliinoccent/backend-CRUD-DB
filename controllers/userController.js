@@ -118,7 +118,7 @@ try{
             const userItems = await items.find({ user: req.user.id });
             
             console.log(userItems);
-           return res.json({data:userItems,status:"ok",stausCode:200})
+           return res.json({Data:founduser,item:userItems,status:"ok",stausCode:200})
         
     }
     

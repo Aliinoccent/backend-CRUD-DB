@@ -1,4 +1,5 @@
 const Item = require('../models/items.js');
+const user = require('../models/user.js');
 
 // Get all items
 exports.getItems = async (req, res) => {
@@ -60,3 +61,27 @@ exports.deleteItem = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+exports.updateItembyUser= async(req,res)=>{
+  const userId=req.params.userId;
+  const itemId=req.params.itemid;
+  console.log(req.user.id)
+  console.log(userId)
+
+  try{
+    if(req.user.id===userId.trim()){
+      console.log('is come inside users validation')
+        const itemfound=await Item.findByIdAndUpdate(itemId,req.body,{
+          new:true
+        });
+        return  res.json({Data:itemfound,status:"ok",succss:true})
+        }
+        else{
+       return   res.json({Data:"user not found"})
+        }
+  
+  }
+  catch(error){
+return res.json({Data:'backend issue',status:'not ok',success:false})
+  }
+
+}
